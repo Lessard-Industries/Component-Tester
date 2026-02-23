@@ -25,7 +25,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
-#define F_VERSION "5.4"
+#define F_VERSION "5.5"
 
 // =============================================================================
 // PINS
@@ -77,7 +77,7 @@ enum ComponentType {
   COMP_NPN, COMP_PNP, COMP_UNKNOWN
 };
 
-enum Mode { MODE_COMPONENT_TEST, MODE_CONTINUITY_TEST, MODE_BATTERY_VOLTAGE, MODE_COUNT };
+enum Mode { MODE_COMPONENT_TEST, MODE_CONTINUITY_TEST, MODE_BATTERY_VOLTAGE, MODE_VOLTAGE_METER, MODE_COUNT };
 enum TestState { TEST_WAITING, TEST_RUNNING, TEST_RESULTS };
 
 struct PinMeasurement {
@@ -117,6 +117,7 @@ void handleMenu();
 void componentTestMode();
 void continuityTestMode();
 void batteryVoltageMode();
+void voltageMeterMode();
 void displayComponentResults();
 void performComponentTest();
 void measureCapacitance(uint8_t pinA, uint8_t pinB, int index);
@@ -262,6 +263,7 @@ void loop() {
       case MODE_COMPONENT_TEST:  componentTestMode();  break;
       case MODE_CONTINUITY_TEST: continuityTestMode(); break;
       case MODE_BATTERY_VOLTAGE: batteryVoltageMode(); break;
+      case MODE_VOLTAGE_METER:   voltageMeterMode();   break;
       default: break;
     }
   }
@@ -313,20 +315,38 @@ void handleMenu() {
     if (needsRedraw) {
       lcd.clear();
       lcd.setCursor(0, 0); lcd.print("=== SELECT MODE ====");
-      const char* names[] = {"Component Test", "Continuity Test", "Battery Voltage"};
-      for (int i = 0; i < MODE_COUNT; i++) {
-        lcd.setCursor(2, i + 1);
-        lcd.print(names[i]);
-      }
+      lcd.setCursor(2, 1); lcd.print("Component Test");
+      lcd.setCursor(2, 2); lcd.print("Continuity Test");
+      // Row 3: two modes share the line
+      lcd.setCursor(2, 3); lcd.print("Battery");
+      lcd.setCursor(13, 3); lcd.print("Voltage");
       needsRedraw = false;
     }
-    
+
+    // Clear old cursor
     if (lastDisplayedMode != (Mode)-1) {
-      lcd.setCursor(0, lastDisplayedMode + 1);
-      lcd.print("  ");
+      if (lastDisplayedMode <= MODE_CONTINUITY_TEST) {
+        lcd.setCursor(0, lastDisplayedMode + 1);
+        lcd.print(" ");
+      } else if (lastDisplayedMode == MODE_BATTERY_VOLTAGE) {
+        lcd.setCursor(0, 3);
+        lcd.print(" ");
+      } else {
+        lcd.setCursor(11, 3);
+        lcd.print(" ");
+      }
     }
-    lcd.setCursor(0, selectedMode + 1);
-    lcd.print("> ");
+    // Draw new cursor
+    if (selectedMode <= MODE_CONTINUITY_TEST) {
+      lcd.setCursor(0, selectedMode + 1);
+      lcd.print(">");
+    } else if (selectedMode == MODE_BATTERY_VOLTAGE) {
+      lcd.setCursor(0, 3);
+      lcd.print(">");
+    } else {
+      lcd.setCursor(11, 3);
+      lcd.print(">");
+    }
     lastDisplayedMode = selectedMode;
   }
 
@@ -920,4 +940,44 @@ void batteryVoltageMode() {
     warned = true;
   }
   if (pctInt > 10) warned = false;
+}
+
+// =============================================================================
+// VOLTAGE METER MODE
+// =============================================================================
+void voltageMeterMode() {
+  static unsigned long lastUpdate = 0;
+  static float lastV = -999.0f;
+
+  if (needsRedraw) {
+    lcd.clear();
+    lcd.setCursor(0, 0); lcd.print("==== VOLTMETER =====");
+    lcd.setCursor(0, 1); lcd.print("Probes on Red/Black ");
+    lcd.setCursor(0, 2); lcd.print("Range: 0 - 28V");
+    needsRedraw = false;
+    lastV = -999.0f;
+  }
+
+  if (millis() - lastUpdate < 120) return;
+  lastUpdate = millis();
+
+  int raw = analogRead(BATTERY_PIN);
+  float voltage = (raw / 1023.0f) * VCC * BATTERY_DIVIDER;
+
+  if (fabs(voltage - lastV) < 0.005f) return;
+  lastV = voltage;
+
+  char line[21];
+  if (voltage < 0.5f) {
+    snprintf(line, 21, "  --- no input ---  ");
+  } else if (voltage < 1.0f) {
+    int mv = (int)(voltage * 1000.0f + 0.5f);
+    snprintf(line, 21, "  %d mV              ", mv);
+  } else {
+    int whole = (int)voltage;
+    int frac = (int)((voltage - whole) * 1000.0f + 0.5f);
+    snprintf(line, 21, "  %d.%03d V            ", whole, frac);
+  }
+  line[20] = '\0';
+  lcd.setCursor(0, 3); lcd.print(line);
 }
