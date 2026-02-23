@@ -835,9 +835,9 @@ void continuityTestMode() {
     } else if (R_unknown < 1.0f) {
       snprintf(line, 21, "%-6s< 1 Ohm        ", label);
     } else if (R_unknown < 1000.0f) {
-      snprintf(line, 21, "%-6s%.0f Ohm        ", label, R_unknown);
+      snprintf(line, 21, "%-6s%.0f Ohm        ", label, (double)R_unknown);
     } else {
-      snprintf(line, 21, "%-6s%.1fk Ohm       ", label, R_unknown / 1000.0f);
+      snprintf(line, 21, "%-6s%.1fk Ohm       ", label, (double)(R_unknown / 1000.0f));
     }
     lcd.setCursor(0, 2); lcd.print(line);
 
