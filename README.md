@@ -13,7 +13,7 @@ The Component Tester automatically identifies and measures common electronic com
 - Resistors (with value measurement)
 - Capacitors (with value measurement)
 - Diodes (standard silicon)
-- LEDs (with color detection: Red / Green / Blue)
+- LEDs (with color detection: Red / Yellow / Green / Blue/White)
 - NPN and PNP BJT transistors
 - Multi-junction devices (FETs, unknown)
 
@@ -47,7 +47,7 @@ The Component Tester automatically identifies and measures common electronic com
     GND    GND    GND
 ```
 
-See [WIRING_GUIDE.txt](WIRING_GUIDE.txt) for the complete wiring diagram including continuity probes, battery monitor, and all UI connections.
+A full wiring guide will be added to the repository in a future update.
 
 ---
 
@@ -58,6 +58,7 @@ See [WIRING_GUIDE.txt](WIRING_GUIDE.txt) for the complete wiring diagram includi
 | A0 | Test Point 1 (TP1) |
 | A1 | Test Point 2 (TP2) |
 | A2 | Test Point 3 (TP3) |
+| A3 | Internal battery monitor (POWER_PIN) |
 | A4 | LCD SDA |
 | A5 | LCD SCL |
 | A6 | Continuity sense |
@@ -95,8 +96,8 @@ Before building, measure your actual resistor values with a multimeter and updat
 
 ```cpp
 #define R_LOW   670.0      // Your measured 680Ω resistor value
-#define R_HIGH  466000.0   // Your measured 470kΩ resistor value
-#define VCC     4.64       // Your actual supply voltage
+#define R_HIGH  465000.0   // Your measured 470kΩ resistor value
+#define VCC     5.05       // Your actual supply voltage
 ```
 
 Accurate values here directly affect measurement accuracy.
