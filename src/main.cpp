@@ -65,7 +65,7 @@ const byte char_transistor[8] PROGMEM  = {0b00100, 0b00110, 0b00101, 0b11101, 0b
 const byte char_copyright[8] PROGMEM   = {0b01110, 0b10001, 0b10101, 0b10111, 0b10101, 0b10001, 0b01110, 0b00000};
 const byte char_logo[8] PROGMEM        = {0b00011, 0b10101, 0b01110, 0b00100, 0b00100, 0b01110, 0b10101, 0b11000};
 
-enum { CHAR_RESISTOR, CHAR_DIODE_ARROW, CHAR_DIODE_LINE, CHAR_CAPACITOR, 
+enum { CHAR_RESISTOR, CHAR_DIODE_ARROW, CHAR_DIODE_LINE, CHAR_CAPACITOR,
        CHAR_OMEGA, CHAR_TRANSISTOR, CHAR_COPYRIGHT, CHAR_LOGO };
 
 // =============================================================================
@@ -373,15 +373,15 @@ void componentTestMode() {
     lcd.clear();
     switch (testState) {
       case TEST_WAITING:
-        lcd.setCursor(0, 0); lcd.print("== COMPONENT TEST ==");
-        lcd.setCursor(2, 1); lcd.print("Insert component");
-        lcd.setCursor(3, 2); lcd.print("1  -  2  -  3");
-        lcd.setCursor(5, 3); lcd.print("Press TEST");
+        lcd.setCursor(0, 0); lcd.print(F("== COMPONENT TEST =="));
+        lcd.setCursor(2, 1); lcd.print(F("Insert component"));
+        lcd.setCursor(3, 2); lcd.print(F("1  -  2  -  3"));
+        lcd.setCursor(5, 3); lcd.print(F("Press TEST"));
         break;
       case TEST_RUNNING:
-        lcd.setCursor(0, 0); lcd.print("== COMPONENT TEST ==");
-        lcd.setCursor(3, 1); lcd.print("Testing...");
-        lcd.setCursor(3, 2); lcd.print("Please wait");
+        lcd.setCursor(0, 0); lcd.print(F("== COMPONENT TEST =="));
+        lcd.setCursor(3, 1); lcd.print(F("Testing..."));
+        lcd.setCursor(3, 2); lcd.print(F("Please wait"));
         break;
       case TEST_RESULTS:
         displayComponentResults();
@@ -400,9 +400,9 @@ void componentTestMode() {
       delay(50);
       
       lcd.clear();
-      lcd.setCursor(0, 0); lcd.print("== COMPONENT TEST ==");
-      lcd.setCursor(3, 1); lcd.print("Testing...");
-      lcd.setCursor(3, 2); lcd.print("Please wait");
+      lcd.setCursor(0, 0); lcd.print(F("== COMPONENT TEST =="));
+      lcd.setCursor(3, 1); lcd.print(F("Testing..."));
+      lcd.setCursor(3, 2); lcd.print(F("Please wait"));
       needsRedraw = false;
       
       performComponentTest();
@@ -719,14 +719,14 @@ void displayCapacitance(float c) {
 void displayComponentResults() {
   switch (detectedComponent) {
     case COMP_NONE:
-      lcd.setCursor(0, 0); lcd.print("=== NO COMPONENT ===");
-      lcd.setCursor(0, 1); lcd.print("Check connections");
+      lcd.setCursor(0, 0); lcd.print(F("=== NO COMPONENT ==="));
+      lcd.setCursor(0, 1); lcd.print(F("Check connections"));
       break;
 
     case COMP_RESISTOR:
-      lcd.setCursor(0, 0); lcd.print("=== "); lcd.write(CHAR_RESISTOR); lcd.print(" RESISTOR =====");
+      lcd.setCursor(0, 0); lcd.print(F("=== ")); lcd.write(CHAR_RESISTOR); lcd.print(F(" RESISTOR ====="));
       lcd.setCursor(0, 1); displayResistance(measuredValue);
-      lcd.setCursor(0, 2); lcd.print("Pins: "); lcd.print(pinout);
+      lcd.setCursor(0, 2); lcd.print(F("Pins: ")); lcd.print(pinout);
       break;
 
     case COMP_DIODE:
@@ -735,49 +735,47 @@ void displayComponentResults() {
     case COMP_LED_GREEN:
     case COMP_LED_BLUE: {
       lcd.setCursor(0, 0);
-      lcd.print("== DIODE ");
+      lcd.print(F("== DIODE "));
       if (detectedComponent == COMP_DIODE) {
-        lcd.print("(Std) "); lcd.write(CHAR_DIODE_LINE);
+        lcd.print(F("(Std) ")); lcd.write(CHAR_DIODE_LINE);
       } else {
-        lcd.print("(LED) "); lcd.write(CHAR_DIODE_ARROW);
+        lcd.print(F("(LED) ")); lcd.write(CHAR_DIODE_ARROW);
       }
-      lcd.print(" ==");
+      lcd.print(F(" =="));
 
       lcd.setCursor(0, 1);
-      lcd.print("Vf = "); lcd.print(measuredValue, 3); lcd.print(" V ");
-      
-      const char* color = "";
+      lcd.print(F("Vf = ")); lcd.print(measuredValue, 3); lcd.print(F(" V "));
+
       switch (detectedComponent) {
-        case COMP_LED_RED:    color = "(Red)"; break;
-        case COMP_LED_YELLOW: color = "(Yel)"; break;
-        case COMP_LED_GREEN:  color = "(Grn)"; break;
-        case COMP_LED_BLUE:   color = "(B/W)"; break;
+        case COMP_LED_RED:    lcd.print(F("(Red)")); break;
+        case COMP_LED_YELLOW: lcd.print(F("(Yel)")); break;
+        case COMP_LED_GREEN:  lcd.print(F("(Grn)")); break;
+        case COMP_LED_BLUE:   lcd.print(F("(B/W)")); break;
         default: break;
       }
-      lcd.print(color);
-      lcd.setCursor(0, 2); lcd.print("Pins: "); lcd.print(pinout);
+      lcd.setCursor(0, 2); lcd.print(F("Pins: ")); lcd.print(pinout);
       break;
     }
 
     case COMP_CAPACITOR:
-      lcd.setCursor(0, 0); lcd.print("=== "); lcd.write(CHAR_CAPACITOR); lcd.print(" CAPACITOR ====");
+      lcd.setCursor(0, 0); lcd.print(F("=== ")); lcd.write(CHAR_CAPACITOR); lcd.print(F(" CAPACITOR ===="));
       lcd.setCursor(0, 1); displayCapacitance(measuredValue);
-      lcd.setCursor(0, 2); lcd.print("Pins: "); lcd.print(pinout);
+      lcd.setCursor(0, 2); lcd.print(F("Pins: ")); lcd.print(pinout);
       break;
 
     case COMP_NPN:
     case COMP_PNP:
-      lcd.setCursor(0, 0); lcd.print("=== "); lcd.write(CHAR_TRANSISTOR); lcd.print(" TRANSISTOR ===");
-      lcd.setCursor(0, 1); lcd.print("Type: ");
-      lcd.print(detectedComponent == COMP_NPN ? "NPN" : "PNP");
+      lcd.setCursor(0, 0); lcd.print(F("=== ")); lcd.write(CHAR_TRANSISTOR); lcd.print(F(" TRANSISTOR ==="));
+      lcd.setCursor(0, 1); lcd.print(F("Type: "));
+      if (detectedComponent == COMP_NPN) lcd.print(F("NPN")); else lcd.print(F("PNP"));
       break;
 
     default:
-      lcd.setCursor(0, 0); lcd.print("===== UNKNOWN ======");
-      lcd.setCursor(0, 1); lcd.print("Unrecognized signal");
+      lcd.setCursor(0, 0); lcd.print(F("===== UNKNOWN ======"));
+      lcd.setCursor(0, 1); lcd.print(F("Unrecognized signal"));
       break;
   }
-  lcd.setCursor(0, 3); lcd.print("TEST=retry Turn=menu");
+  lcd.setCursor(0, 3); lcd.print(F("TEST=retry Turn=menu"));
 }
 
 // =============================================================================
